@@ -238,7 +238,6 @@ plt.show()
 
 #-----------------------------PARTE 4-------------------------------------------
 
-
 #uso los parametros de la señal original
 f = 2000         
 fs = 6000       
