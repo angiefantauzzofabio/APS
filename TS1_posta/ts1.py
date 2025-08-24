@@ -228,7 +228,7 @@ plt.show()
 
 corr_3 = np.correlate(yy, yy_clip, mode='full')
 plt.plot(corr_3)
-plt.title("Correlacion entre señal original y clipeada")
+relacioplt.title("Correlacion entre señal original y clipeada")
 plt.grid(True)
 plt.show()
 
