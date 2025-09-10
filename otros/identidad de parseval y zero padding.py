@@ -94,3 +94,4 @@ plt.show()
 #El padding sirve para aumentar la resolucion, basicamente aumento la cantidad de muestras haciendo lo de 10*N
 #y ahi veo los picos, es como que interpolo con la sinc, como le doy mas puntos aparece la sinc que antes no se veia
 #con el zero padding aumento la resolucion espectral sin modificar la cantidad de muestras (N) y la frcuencia de muestreo!
+#El padding NO mejora la resolución espectral real, solo te da más puntos en el eje de frecuencia (interpolación del espectro).
