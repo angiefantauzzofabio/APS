@@ -65,6 +65,7 @@ if suma_modulo_cuadrado == suma_cuadrados:
     print("se cumple parseval")
 else:
     print("no se cumple")
+
     
     
     

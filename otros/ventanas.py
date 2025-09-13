@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import get_window
 
-# Definimos parámetros
 N = 51  # longitud de la ventana
 ventanas = {
     "Rectangular": "boxcar",
@@ -20,7 +19,7 @@ ventanas = {
     "Flattop": "flattop"
 }
 
-# Vector de frecuencia normalizada [-pi, pi]
+
 w = np.linspace(-np.pi, np.pi, 2048)
 
 plt.figure(figsize=(10,5))
