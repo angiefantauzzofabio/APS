@@ -30,6 +30,7 @@ t3,x3 = sen(ff=((N/4) + 0.5)*delta_f, nn=N, fs=fs)
 
 #punto 2: Calcular en db el modulo cuadrado del especto y graficar. Ver densidad espectral de potencia
 
+
 X1= fft(x1)*(1/N)
 X1_abs= np.abs(X1)
 X1_abs_cuadrado = X1_abs**2
@@ -74,6 +75,29 @@ plt.grid(True)
 
 plt.suptitle("Densidad espectral de potencia de X1, X2 y X3", fontsize=14)
 plt.tight_layout(rect=[0,0,1,0.96])
+plt.show()
+
+#Graficos individuales
+
+plt.figure() 
+plt.plot(Ff,10*np.log10(X1_abs_cuadrado), label = "Densidad espectral de X1", color = "blue") #espectro en potencia 
+plt.xlim([0,fs/2]) #fs/2 es la frecuencia de nyquist 
+plt.legend() 
+plt.grid(True) 
+plt.show() 
+
+plt.figure() 
+plt.plot(Ff,10*np.log10(X2_abs_cuadrado), label = "Densidad espectral de X2", color = "red") #espectro en potencia 
+plt.xlim([0,fs/2]) #fs/2 es la frecuencia de nyquist 
+plt.legend() 
+plt.grid(True) 
+plt.show() 
+
+plt.figure() 
+plt.plot(Ff,10*np.log10(X3_abs_cuadrado), label = "Densidad espectral de X3", color = "green") #espectro en potencia 
+plt.xlim([0,fs/2]) #fs/2 es la frecuencia de nyquist 
+plt.legend() 
+plt.grid(True) 
 plt.show()
 
 
@@ -156,6 +180,40 @@ plt.legend()
 plt.grid(True)
 
 
+
+#Graficos individuales 
+
+plt.figure()
+plt.plot(Ff_padding, 10*np.log10(X1_padding_fft_modulo), label="X1 con zero padding")
+plt.xlim([0,fs/2])
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Potencia [dB]")
+plt.title("Espectro de la señal con Zero Padding")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+plt.figure()
+plt.plot(Ff_padding, 10*np.log10(X2_padding_fft_modulo), label="X2 con zero padding", color = "red")
+plt.xlim([0,fs/2])
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Potencia [dB]")
+plt.title("Espectro de la señal con Zero Padding")
+plt.legend()
+plt.grid()
+plt.show()
+
+
+plt.figure()
+plt.plot(Ff_padding, 10*np.log10(X3_padding_fft_modulo), label="X3 con zero padding", color = "violet")
+plt.xlim([0,fs/2])
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Potencia [dB]")
+plt.title("Espectro de la señal con Zero Padding")
+plt.legend()
+plt.grid()
+plt.show()
 
 
 
