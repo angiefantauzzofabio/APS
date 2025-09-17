@@ -31,15 +31,15 @@ t3,x3 = sen(ff=((N/4) + 0.5)*delta_f, nn=N, fs=fs)
 #punto 2: Calcular en db el modulo cuadrado del especto y graficar. Ver densidad espectral de potencia
 
 
-X1= fft(x1)*(1/N)
+X1= fft(x1)
 X1_abs= np.abs(X1)
 X1_abs_cuadrado = X1_abs**2
 
-X2= fft(x2)*(1/N)
+X2= fft(x2)
 X2_abs= np.abs(X2)
 X2_abs_cuadrado = X2_abs**2
 
-X3= fft(x3)*(1/N)
+X3= fft(x3)
 X3_abs= np.abs(X3)
 X3_abs_cuadrado = X3_abs**2
 
