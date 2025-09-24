@@ -88,19 +88,23 @@ a2 = np.abs(S_blackmanharris_fft[N//4, :])
 a3 = np.abs(S_blackman_fft[N//4, :])
 
 #Genero los estimadores de frecuencia
-f1 = np.abs(np.argmax(S_fft, axis=0))
-f2 = np.abs(np.argmax(S_flattop_fft, axis=0))
-f3 = np.abs(np.argmax(S_blackmanharris_fft, axis=0))
-f4 = np.abs(np.argmax(S_blackman_fft, axis=0))
+N_half = N//2 + 1  # de 0 a fs/2
+
+
+f1 = np.abs(np.argmax(S_fft[:N_half, :], axis=0))
+f2 = np.abs(np.argmax(S_flattop_fft[:N_half, :], axis=0))
+f3 = np.abs(np.argmax(S_blackmanharris_fft[:N_half, :], axis=0))
+f4 = np.abs(np.argmax(S_blackman_fft[:N_half, :], axis=0))
 
 # eje de frecuencias (Hz)
 freqs = np.fft.fftfreq(N, d=1/fs)  # vector de frecuencias entre -fs/2 y fs/2
+freqs_pos = freqs[:N_half]
 
 # Los paso a  Hz
-f1_hz = freqs[f1]
-f2_hz = freqs[f2]
-f3_hz = freqs[f3]
-f4_hz = freqs[f4]
+f1_hz = freqs_pos[f1]
+f2_hz = freqs_pos[f2]
+f3_hz = freqs_pos[f3]
+f4_hz = freqs_pos[f4]
 
 
 #Los paso a dB
