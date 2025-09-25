@@ -19,7 +19,7 @@ y el nivel de ruido.
 # Lectura de ECG #
 ##################
 
-fs_ecg = 1000
+efs_ecg = 1000
 mat_struct = sio.loadmat('ECG_TP4.mat')
 ecg = mat_struct['ecg_lead'].squeeze()   # <-- convierte (N,1) en (N,)
 ecg = ecg - np.mean(ecg)

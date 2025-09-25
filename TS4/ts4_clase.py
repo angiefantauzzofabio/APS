@@ -25,7 +25,7 @@ def seno(tt,frec,amp,fase = 0, v_medio=0):
     return xx
 
 
-SNR = 10 #SNR es db
+SNR = 3 #SNR es db
 amp_0= np.sqrt(2) #en Volts
 N = 1000
 fs = N # en Hertz
