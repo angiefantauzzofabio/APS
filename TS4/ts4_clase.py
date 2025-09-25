@@ -88,7 +88,7 @@ a2 = np.abs(S_blackmanharris_fft[N//4, :])
 a3 = np.abs(S_blackman_fft[N//4, :])
 
 #Genero los estimadores de frecuencia
-N_half = N//2 + 1  # de 0 a fs/2
+N_half = N//2 # de 0 a fs/2
 
 
 f1 = np.abs(np.argmax(S_fft[:N_half, :], axis=0))
