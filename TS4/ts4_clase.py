@@ -25,7 +25,7 @@ def seno(tt,frec,amp,fase = 0, v_medio=0):
     return xx
 
 
-SNR = 3 #SNR es db
+SNR = 10 #SNR es db
 amp_0= np.sqrt(2) #en Volts
 N = 1000
 fs = N # en Hertz
@@ -241,7 +241,7 @@ Ventanas rectangulares (sin ventana) tienen mayor dispersión pero menos “ensa
 
 """
 
-
+"""
 
 #Para graficar armo grafico de frecuencias
 ff =  np.linspace(0, fs, N)
@@ -289,7 +289,7 @@ plt.show()
 #Basicamen calculamos el sesgo.
 
 
-
+"""
 
 
 
