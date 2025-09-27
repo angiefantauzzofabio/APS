@@ -25,7 +25,7 @@ def seno(tt,frec,amp,fase = 0, v_medio=0):
     return xx
 
 
-SNR = 10 #SNR es db
+SNR = 3 #SNR es db
 amp_0= np.sqrt(2) #en Volts
 N = 1000
 fs = N # en Hertz
@@ -91,10 +91,10 @@ a3 = np.abs(S_blackman_fft[N//4, :])
 N_half = N//2 # de 0 a fs/2
 
 
-f1 = np.abs(np.argmax(S_fft[:N_half, :], axis=0))
-f2 = np.abs(np.argmax(S_flattop_fft[:N_half, :], axis=0))
-f3 = np.abs(np.argmax(S_blackmanharris_fft[:N_half, :], axis=0))
-f4 = np.abs(np.argmax(S_blackman_fft[:N_half, :], axis=0))
+f1 = np.argmax(np.abs(S_fft[:N//2, :]), axis=0)
+f2 = np.argmax(np.abs(S_flattop_fft[:N//2, :]), axis=0)
+f3 = np.argmax(np.abs(S_blackmanharris_fft[:N//2, :]), axis=0)
+f4 = np.argmax(np.abs(S_blackman_fft[:N//2, :]), axis=0)
 
 # eje de frecuencias (Hz)
 freqs = np.fft.fftfreq(N, d=1/fs)  # vector de frecuencias entre -fs/2 y fs/2
@@ -139,6 +139,7 @@ plt.ylabel("Número de realizaciones")
 plt.title("Histogramas de los estimadores de frecuencia")
 plt.legend()
 plt.show()
+
 
 #El histograma muestra cómo se distribuyen los valores del estimador de amplitud a lo largo de las realizaciones.
 #Te da una aproximación empírica de la distribución del estimador.
