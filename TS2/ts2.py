@@ -64,9 +64,9 @@ Considere que las mismas son causales.
 
 
 """
-para calcular la respuesta al impulso uso lfilter, le paso los coeficientes y el delta. Lo que me garantiza un 
-LTI es que si yo conozco h (la respuesta al impulso) puedo concer la y[n] (la salida) convolucionando la x[n]
-(la sen1al) con la respuesta al impulso. 
+para calcular la respuesta al impulso uso lfilter, le paso los coeficientes y el delta. 
+Lo que me garantiza un LTI es que si yo conozco h (la respuesta al impulso) 
+puedo concer la y[n] (la salida) convolucionando la x[n] (la sen1al) con la respuesta al impulso. 
 Entonces la rta la hago con lfilter pasandole los coeficientes (es como la cajita que me genera esta linealidad e invarianza)
 y desp para la salida con la convolucion
 
