@@ -267,6 +267,67 @@ plt.show()
 
 
 
+def estimar_BW(PSD, ff, cota):
+    df = ff[1] - ff[0]
+    energia_acumulada = np.cumsum(PSD * df)
+    energia_total = energia_acumulada[-1]
+    energia_corte = energia_total * cota
+    idx_corte = np.where(energia_acumulada >= energia_corte)[0][0]
+    frec_BW = ff[idx_corte]
+    return frec_BW
+
+
+# ==========================================================
+# 🔹 Cálculo del ancho de banda efectivo con tu función
+# ==========================================================
+
+# --- ECG ---
+BW_ecg_per = estimar_BW(P_per, f_per, 0.95)
+BW_ecg_welch = estimar_BW(P_welch, f_welch, 0.95)
+BW_ecg_win = estimar_BW(P_win, f_win, 0.95)
+
+# En Blackman–Tukey el espectro está centrado en 0, por lo tanto
+# usamos solo la mitad positiva para medir hasta fs/2
+mask_bt_ecg = f_bt >= 0
+BW_ecg_bt = estimar_BW(P_bt[mask_bt_ecg], f_bt[mask_bt_ecg], 0.95)
+
+print("=== Ancho de banda ECG ===")
+print(f"Periodograma:        {BW_ecg_per:.2f} Hz")
+print(f"Welch:               {BW_ecg_welch:.2f} Hz")
+print(f"Ventaneado (Hann):   {BW_ecg_win:.2f} Hz")
+print(f"Blackman–Tukey:      {BW_ecg_bt:.2f} Hz\n")
+
+
+# --- PPG ---
+BW_ppg_per = estimar_BW(P2_per, f2_per, 0.95)
+BW_ppg_welch = estimar_BW(P2_welch, f2_welch, 0.95)
+BW_ppg_win = estimar_BW(P2_win, f2_win, 0.95)
+
+mask_bt_ppg = f_bt_2 >= 0
+BW_ppg_bt = estimar_BW(P_bt_2[mask_bt_ppg], f_bt_2[mask_bt_ppg], 0.95)
+
+print("=== Ancho de banda PPG ===")
+print(f"Periodograma:        {BW_ppg_per:.2f} Hz")
+print(f"Welch:               {BW_ppg_welch:.2f} Hz")
+print(f"Ventaneado (Hann):   {BW_ppg_win:.2f} Hz")
+print(f"Blackman–Tukey:      {BW_ppg_bt:.2f} Hz\n")
+
+
+# --- AUDIO ---
+BW_audio_per = estimar_BW(P_raw, f_raw, 0.99)
+BW_audio_welch = estimar_BW(P_welch, f_welch, 0.99)
+BW_audio_win = estimar_BW(P_win, f_win, 0.99)
+
+mask_bt_audio = f_bt >= 0
+BW_audio_bt = estimar_BW(P_bt[mask_bt_audio], f_bt[mask_bt_audio], 0.99)
+
+print("=== Ancho de banda AUDIO ===")
+print(f"Periodograma:        {BW_audio_per:.2f} Hz")
+print(f"Welch:               {BW_audio_welch:.2f} Hz")
+print(f"Ventaneado (Hann):   {BW_audio_win:.2f} Hz")
+print(f"Blackman–Tukey:      {BW_audio_bt:.2f} Hz\n")
+
+
 
 
 
