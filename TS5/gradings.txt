@@ -1,0 +1,25 @@
+Informe:
+    Edición: Uso de tildes, uso de comas, donde dice desparramiento debió decir desparramo. 
+    Conclusión: La idea general que presentan está bien, pero hay que trabajarla más. El primer
+    problema que tienen que solucionar es el de redacción. Por ejemplo en esta línea:  
+    "Blackman-Tukey depende del tamaño de la ventana de autocorrelación, ajustando resolución y 
+    la suavidad.". No se entiende por qué hay mayores diferencias en las estimaciones del ancho 
+    de banda en las señales biológicas.
+
+Código:
+    Corre sin problemas.    
+
+Desarrollo:
+    Traten de volver a publicar en NBViewer por favor.
+    El análisis general que hacen del punto 1 está bien en general, pero traten de dar una explicación 
+    de lo que van mostrando en los gráficos, un análisis aunque sea mínimo en cada señal. La idea
+    de usar Jupyter Notebook es para poder mostrar código, resultados y análisis de los mismos.
+    Prueben también usando diferentes ventanas en Welch, o justifiquen por qué usaron Hann al menos.
+    Los resultados en la estimación del ancho de banda de las señales parecen muy inexactos. Fíjense si
+    no tienen un error.
+    Sumen un gráfico en el punto 2, para mostrar el espectro en el ancho de banda estimado.
+    Hagan un análisis de qué método de estimación espectral sería mejor para la estimación del ancho de 
+    banda.    
+    
+Sugerencias:
+    No hace falta mostrar el espectro hasta N, con mostrar hasta Nyquist está bien.
