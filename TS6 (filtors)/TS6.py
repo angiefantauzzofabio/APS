@@ -16,13 +16,15 @@ from scipy import signal
 num_T1 = [1, 0, 9]             # a*s^2 + d*s + b
 den_T1 = [1, np.sqrt(2), 1]    # s^2 + s/CR + 1/CL
 
-# T2(s) = (s^2 + 0.2*s + 1)/(s^2 + sqrt(2) s + 1)
-num_T2 = [1, 0.2, 1]
-den_T2 = [1, np.sqrt(2), 1]
+# T2(s) = (s^2 + 1/9)/(s^2 + 0.2*s + 1)
+num_T2 = [1, 0, 1/9]
+den_T2 = [1, 0.2, 1]
 
-# T3(s) = (s^2 + 1/9)/(s^2 + 0.2*s + 1)
-num_T3 = [1, 0, 1/9]
-den_T3 = [1, 0.2, 1]
+
+# T3(s) = (s^2 + 0.2*s + 1)/(s^2 + sqrt(2) s + 1)
+num_T3 = [1, 0.2, 1]
+den_T3 = [1, np.sqrt(2), 1]
+
 
 # Creamos listas para iterar fácilmente
 filtros = {
