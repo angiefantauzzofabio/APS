@@ -184,8 +184,172 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+# %%
+"""
+Ahora el filtro adaptado. Nos dan el patron 
+"""
 
 
+patron = mat_struct['qrs_pattern1'].flatten() #el problema de este patron es que el valor medio no va a estar siempre igual
+#este matron es un pico random del ECG. Cuando grasfique el patron me conviene hacerlo restandole la media
+patron_sm = patron - patron.mean() #AREA NETA NULA (USAR ESTE PATRON PARA QUE NO TENGA AREA NETA NEGATIVA)
+plt.figure()
+plt.plot(patron,  color='orange')
+plt.plot(patron_sm, color='blue')
+plt.show()
+
+#el patron lo quiero usar como coeficiente de un filtro uso lfilter
+
+ecg_detection = signal.lfilter(b=patron_sm, a=1, x=ecg_one_lead) #si lo grafico tiene demasiada amplitud pero esta centrada en cero
+ecg_detection = np.abs(ecg_detection)
+
+#Normalizo las dos para que ambas tengas varianza unitaria (sino son muy diferentes y no las puedo comparar)
+plt.figure()
+plt.plot(ecg_detection/(np.std(ecg_detection)),  color='orange')
+plt.plot(ecg_one_lead/(np.std(ecg_one_lead)), color='blue')
+plt.show()
+
+#Al hacerle zoom vemos que el ecg con el patron tiene retardo. El retardo se debe a que el sistema lineal tiene retardo y como no es simetrico va a tener cualq retardo.
+#si me adelanto unas muestras del ecg_detection se va a ver medio mejor
+#el siguiente paso es detectar los picos, se que son 1903
+
+mis_qrs = signal.find_peaks(x = ecg_detection, height=1 , distance=300)[0] #la distacia es un dato fisiologico, dist entre picos
+print(mis_qrs)
+qrs_det = mat_struct['qrs_detections'].flatten()
+
+#Hago la matriz de confusion para detectar los falsos positivos o negativos
+from scipy.spatial import distance
+
+def matriz_confusion_qrs(mis_qrs, qrs_det, tolerancia_ms=150, fs=1000):
+    """
+    Calcula matriz de confusión para detecciones QRS usando solo NumPy y SciPy
+    
+    Parámetros:
+    - mis_qrs: array con tiempos de tus detecciones (muestras)
+    - qrs_det: array con tiempos de referencia (muestras)  
+    - tolerancia_ms: tolerancia en milisegundos (default 150ms)
+    - fs: frecuencia de muestreo (default 360 Hz)
+    """
+    
+    # Convertir a arrays numpy
+    mis_qrs = np.array(mis_qrs)
+    qrs_det = np.array(qrs_det)
+    
+    # Convertir tolerancia a muestras
+    tolerancia_muestras = tolerancia_ms * fs / 1000
+    
+    # Inicializar contadores
+    TP = 0  # True Positives
+    FP = 0  # False Positives
+    FN = 0  # False Negatives
+    
+    # Arrays para marcar detecciones ya emparejadas
+    mis_qrs_emparejados = np.zeros(len(mis_qrs), dtype=bool)
+    qrs_det_emparejados = np.zeros(len(qrs_det), dtype=bool)
+    
+    # Encontrar True Positives (detecciones que coinciden dentro de la tolerancia)
+    for i, det in enumerate(mis_qrs):
+        diferencias = np.abs(qrs_det - det)
+        min_diff_idx = np.argmin(diferencias)
+        min_diff = diferencias[min_diff_idx]
+        
+        if min_diff <= tolerancia_muestras and not qrs_det_emparejados[min_diff_idx]:
+            TP += 1
+            mis_qrs_emparejados[i] = True
+            qrs_det_emparejados[min_diff_idx] = True
+    
+    # False Positives (tus detecciones no emparejadas)
+    fp_index = np.where(~mis_qrs_emparejados)[0] #el cero para que lo devuelva fuera de tupla
+    tp_index = np.where(mis_qrs_emparejados)[0]
+    FP = np.sum(~mis_qrs_emparejados)
+    
+    # False Negatives (detecciones de referencia no emparejadas)
+    fn_index = np.where(~qrs_det_emparejados)[0]
+    FN = np.sum(~qrs_det_emparejados)
+    
+    # Construir matriz de confusión
+    matriz = np.array([
+        [TP, FP],
+        [FN, 0]  # TN generalmente no aplica en detección de eventos
+    ])
+    
+    return matriz, TP, FP, FN, fp_index, fn_index, tp_index
+
+# Ejemplo de uso
+
+matriz, tp, fp, fn,fp_index, fn_index, tp_index = matriz_confusion_qrs(mis_qrs, qrs_det)
+
+print("Matriz de Confusión:")
+print(f"           Predicho")
+print(f"           Sí    No")
+print(f"Real Sí:  [{tp:2d}   {fn:2d}]")
+print(f"Real No:  [{fp:2d}    - ]")
+print(f"\nTP: {tp}, FP: {fp}, FN: {fn}")
+
+# Calcular métricas de performance
+if tp + fp > 0:
+    precision = tp / (tp + fp)
+else:
+    precision = 0
+
+if tp + fn > 0:
+    recall = tp / (tp + fn)
+else:
+    recall = 0
+
+if precision + recall > 0:
+    f1_score = 2 * (precision * recall) / (precision + recall)
+else:
+    f1_score = 0
+
+print(f"\nMétricas:")
+print(f"Precisión: {precision:.3f}")
+print(f"Sensibilidad: {recall:.3f}")
+print(f"F1-score: {f1_score:.3f}")
+
+ecg_norm = ecg_one_lead/(np.std(ecg_one_lead))
+
+plt.figure()
+plt.plot(ecg_norm)
+plt.plot(mis_qrs[tp_index],ecg_norm[mis_qrs[tp_index]], "og")
+plt.plot(mis_qrs[fp_index],ecg_norm[mis_qrs[fp_index]], "dr") #valores falsos que estaban en mis qrs
+#plt.plot(qrs_det[fn_index],ecg_norm[qrs_det[fp_index]], "ob") #valoresq no detecte. los busco en la otra lista.
+plt.show()
+
+#con lo de la matriz de confusion arreglo mis_qrs y hago una matriz de 1905 (que son los picos) y 113 que es el patron
+#despiues pruebo promediando, quiero buscar la que mejor prlmedia a las 1905 realizaciones. 
+
+
+"""
+Arreglo mi vector de detecciones eliminando los falsos positivos
+"""
+
+mis_qrs_corrected = np.delete(mis_qrs, fp_index)
+mis_qrs_corrected = np.concatenate([mis_qrs_corrected, qrs_det[fn_index]])
+mis_qrs_corrected = np.sort(mis_qrs_corrected)
+
+qrs_mat = np.array([ecg_one_lead[ii-60:ii+60] for ii in mis_qrs_corrected])
+
+#plt.figure()
+#plt.plot(qrs_mat.transpose())
+#plt.show()
+#al graficarlos todos tiene un linea continua diferente. 
+#lo sulucionamos quitandole el nivel medio. lo hacemos nuelo
+qrs_mat = qrs_mat -np.mean(qrs_mat, axis=1).reshape((-1,1))
+#plotea devuelta sin el valor medio
+plt.figure()
+plt.plot(qrs_mat.transpose()) #con esto alineamos los latidos. Ahora quiero ver que si lo promediamos vamos a encontrar un latido medio con menos ruido
+plt.show()
+
+"""
+para afinar las muestras usamos el algoritmo de woody. hace un patros prmedio, es el latido medio
+una vez que calcula ese latido medio, calcula la corelacion cruzada. calcula la correlacion entre ese latido medio
+y las realizaciones. El maxio de correlacion va a haber cuando haya mayor solapamiento
+esto va a pasar cuando este mas alineado. esta correlacion nos va a dar el defasaje adecuado para moder nuestros latidos y alinearlo mas al 
+latido medio. 
+si repetis esto, termina convergiendo a alinear todo!
+Es algo extra esto pero esta interesante para saber!
+"""
 
 
 
