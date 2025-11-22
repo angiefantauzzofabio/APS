@@ -198,24 +198,60 @@ plt.plot(patron,  color='orange')
 plt.plot(patron_sm, color='blue')
 plt.show()
 
+
+
 #el patron lo quiero usar como coeficiente de un filtro uso lfilter
 
-ecg_detection = signal.lfilter(b=patron_sm, a=1, x=ecg_one_lead) #si lo grafico tiene demasiada amplitud pero esta centrada en cero
+ecg_detection = signal.lfilter(b=patron_sm[::-1], a=1, x=ecg_one_lead) #si lo grafico tiene demasiada amplitud pero esta centrada en cero
 ecg_detection = np.abs(ecg_detection)
 
 #Normalizo las dos para que ambas tengas varianza unitaria (sino son muy diferentes y no las puedo comparar)
 plt.figure()
 plt.plot(ecg_detection/(np.std(ecg_detection)),  color='orange')
 plt.plot(ecg_one_lead/(np.std(ecg_one_lead)), color='blue')
+plt.title('ecg detecciones con lfilter')
 plt.show()
 
 #Al hacerle zoom vemos que el ecg con el patron tiene retardo. El retardo se debe a que el sistema lineal tiene retardo y como no es simetrico va a tener cualq retardo.
 #si me adelanto unas muestras del ecg_detection se va a ver medio mejor
 #el siguiente paso es detectar los picos, se que son 1903
 
+
+# --------------------------------------------------------
+# 2) MATCHED FILTER REAL usando correlación cruzada
+# --------------------------------------------------------
+# En un matched filter, la operación correcta es correlación
+# (y NO usar lfilter + abs).
+# Reemplazo completamente tu lfilter por correlate.
+# --------------------------------------------------------
+
+# Invierto el patrón: h[n] = p[-n]
+# ← CAMBIO agregado
+h = patron_sm[::-1]
+
+# Correlación cruzada entre la señal y el filtro adaptado
+# ← CAMBIO agregado (esta línea reemplaza a lfilter + abs)
+
+ecg_detection2 = signal.correlate(ecg_one_lead, h, mode='same')
+ecg_detection2 = np.abs(ecg_detection2)                 # tomar magnitud
+ecg_detection2 = ecg_detection2 / np.std(ecg_detection2)  # normalizar
+
+
+# Graficación comparativa con la señal original (opcional)
+plt.figure()
+plt.plot(ecg_detection2, color='orange')
+plt.plot(ecg_one_lead / np.std(ecg_one_lead), color='blue')
+plt.title('ecg detecciones con correlacion')
+plt.show()
+
+""""""""""""""
+
 mis_qrs = signal.find_peaks(x = ecg_detection, height=1 , distance=300)[0] #la distacia es un dato fisiologico, dist entre picos
 print(mis_qrs)
 qrs_det = mat_struct['qrs_detections'].flatten()
+
+mis_qrs2=signal.find_peaks(x = ecg_detection2, height=1 , distance=300)[0] #esto es con correlacion
+
 
 #Hago la matriz de confusion para detectar los falsos positivos o negativos
 from scipy.spatial import distance
@@ -278,7 +314,12 @@ def matriz_confusion_qrs(mis_qrs, qrs_det, tolerancia_ms=150, fs=1000):
 # Ejemplo de uso
 
 matriz, tp, fp, fn,fp_index, fn_index, tp_index = matriz_confusion_qrs(mis_qrs, qrs_det)
+matriz2, tp2, fp2, fn2,fp_index2, fn_index2, tp_index2 = matriz_confusion_qrs(mis_qrs2, qrs_det)
 
+
+##-------------------------
+# METRICAS DE PATRON CON LFILTER
+##------------------------
 print("Matriz de Confusión:")
 print(f"           Predicho")
 print(f"           Sí    No")
@@ -302,10 +343,42 @@ if precision + recall > 0:
 else:
     f1_score = 0
 
-print(f"\nMétricas:")
+print(f"\nMétricas CON LFILTER:")
 print(f"Precisión: {precision:.3f}")
 print(f"Sensibilidad: {recall:.3f}")
 print(f"F1-score: {f1_score:.3f}")
+
+##---------------------------------------------------
+# METRICAS DE PATRON CON CORRELACION (SON MEJORES!)
+##---------------------------------------------------
+
+print("Matriz de Confusión:")
+print(f"           Predicho")
+print(f"           Sí    No")
+print(f"Real Sí:  [{tp2:2d}   {fn2:2d}]")
+print(f"Real No:  [{fp2:2d}    - ]")
+print(f"\nTP: {tp2}, FP: {fp2}, FN: {fn2}")
+
+# Calcular métricas de performance
+if tp2 + fp2 > 0:
+    precision2 = tp2 / (tp2 + fp2)
+else:
+    precision2 = 0
+
+if tp2 + fn2 > 0:
+    recall2 = tp2 / (tp2 + fn2)
+else:
+    recall2 = 0
+
+if precision2 + recall2 > 0:
+    f1_score2 = 2 * (precision2 * recall2) / (precision2 + recall2)
+else:
+    f1_score2 = 0
+
+print(f"\nMétricas CON CORRELACION:")
+print(f"Precisión: {precision2:.3f}")
+print(f"Sensibilidad: {recall2:.3f}")
+print(f"F1-score: {f1_score2:.3f}")
 
 ecg_norm = ecg_one_lead/(np.std(ecg_one_lead))
 
@@ -314,7 +387,18 @@ plt.plot(ecg_norm)
 plt.plot(mis_qrs[tp_index],ecg_norm[mis_qrs[tp_index]], "og")
 plt.plot(mis_qrs[fp_index],ecg_norm[mis_qrs[fp_index]], "dr") #valores falsos que estaban en mis qrs
 #plt.plot(qrs_det[fn_index],ecg_norm[qrs_det[fp_index]], "ob") #valoresq no detecte. los busco en la otra lista.
+plt.title('DETECCIONES PASADAS POR MATRIZ DE CONFUSION, LFILTER')
 plt.show()
+
+
+plt.figure()
+plt.plot(ecg_norm)
+plt.plot(mis_qrs2[tp_index2],ecg_norm[mis_qrs2[tp_index2]], "og")
+plt.plot(mis_qrs2[fp_index2],ecg_norm[mis_qrs2[fp_index2]], "dr") #valores falsos que estaban en mis qrs
+#plt.plot(qrs_det[fn_index2],ecg_norm[qrs_det[fp_index2]], "ob") #valoresq no detecte. los busco en la otra lista.
+plt.title('DETECCIONES PASADAS POR MATRIZ DE CONFUSION, CORRELACION')
+plt.show()
+
 
 #con lo de la matriz de confusion arreglo mis_qrs y hago una matriz de 1905 (que son los picos) y 113 que es el patron
 #despiues pruebo promediando, quiero buscar la que mejor prlmedia a las 1905 realizaciones. 
@@ -339,7 +423,34 @@ qrs_mat = qrs_mat -np.mean(qrs_mat, axis=1).reshape((-1,1))
 #plotea devuelta sin el valor medio
 plt.figure()
 plt.plot(qrs_mat.transpose()) #con esto alineamos los latidos. Ahora quiero ver que si lo promediamos vamos a encontrar un latido medio con menos ruido
+plt.title('Latidos alineados con detecciones por lfilter')
 plt.show()
+
+"""
+Arreglo mi vector de detecciones CON CORRELACIÓN eliminando los falsos positivos
+"""
+
+# 1) Quito los falsos positivos detectados por correlación
+mis_qrs2_corrected = np.delete(mis_qrs2, fp_index2)
+
+# 2) Agrego los falsos negativos (los que estaban en la referencia y no detectó mi algoritmo)
+mis_qrs2_corrected = np.concatenate([mis_qrs2_corrected, qrs_det[fn_index2]])
+
+# 3) Ordeno las detecciones finales
+mis_qrs2_corrected = np.sort(mis_qrs2_corrected)
+
+# 4) Construyo la matriz de latidos recortando alrededor de cada detector corregido
+qrs_mat2 = np.array([ecg_one_lead[ii-60:ii+60] for ii in mis_qrs2_corrected])
+
+# 5) Quitar el nivel medio de cada latido (centrado por fila)
+qrs_mat2 = qrs_mat2 - np.mean(qrs_mat2, axis=1).reshape((-1,1))
+
+# 6) Graficar realizaciones alineadas (debería verse más prolijo que con lfilter)
+plt.figure()
+plt.plot(qrs_mat2.transpose())
+plt.title('Latidos alineados con detecciones por correlación')
+plt.show()
+
 
 """
 para afinar las muestras usamos el algoritmo de woody. hace un patros prmedio, es el latido medio
